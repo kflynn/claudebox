@@ -25,6 +25,8 @@ while [ $# -gt 0 ]; do
             ;;
         -*)
             echo "claudebox: unrecognized option: $1" >&2
+            echo ""
+            echo "Usage: claudebox [--bash|--shell] [WORKDIR]" >&2
             exit 1
             ;;
         *)
@@ -58,4 +60,4 @@ docker run -it --rm \
     -e STARTCMD=$STARTCMD \
     $ENV_FILE_OPT \
     $TZ_ENV \
-    claudebox:latest
+    ghcr.io/kflynn/claudebox:latest
