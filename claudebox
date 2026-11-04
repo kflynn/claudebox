@@ -1,0 +1,61 @@
+#!/bin/sh
+
+WORKDIR="$(pwd)"
+STARTCMD="claude"
+TZ_ENV=""
+WORKDIR_GIVEN=0
+
+# Honor TZ if the host sets it; otherwise derive the local zone from
+# /etc/localtime, which symlinks into a zoneinfo tree (macOS and most Linux).
+# Fall back to date's zone abbreviation if there is no /etc/localtime.
+if [ -n "${TZ:-}" ]; then
+    TZ_ENV="-e TZ=$TZ"
+else
+    TZ="$(readlink /etc/localtime 2>/dev/null | sed -n 's/.*zoneinfo\///p')"
+    [ -n "$TZ" ] || TZ="$(date +%Z 2>/dev/null)"
+    if [ -n "$TZ" ]; then
+        TZ_ENV="-e TZ=$TZ"
+    fi
+fi
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --bash|--shell)
+            STARTCMD="bash"
+            ;;
+        -*)
+            echo "claudebox: unrecognized option: $1" >&2
+            exit 1
+            ;;
+        *)
+            if [ "$WORKDIR_GIVEN" -eq 1 ]; then
+                echo "claudebox: unexpected argument: $1" >&2
+                exit 1
+            fi
+            WORKDIR="$1"
+            WORKDIR_GIVEN=1
+            ;;
+    esac
+    shift
+done
+
+EXTRA_MOUNTS=
+
+if [ -r $HOME/.claudebox/mounts ]; then
+    EXTRA_MOUNTS="$(cat $HOME/.claudebox/mounts)"
+fi
+
+ENV_FILE="$HOME/.claudebox/environment"
+
+if [ -r "$ENV_FILE" ]; then
+    ENV_FILE_OPT="--env-file $ENV_FILE"
+fi
+
+docker run -it --rm \
+    -v "$WORKDIR:/work" \
+    -v $HOME/.claudebox/scripts:/home/code/.claudebox/scripts \
+    $EXTRA_MOUNTS \
+    -e STARTCMD=$STARTCMD \
+    $ENV_FILE_OPT \
+    $TZ_ENV \
+    claudebox:latest

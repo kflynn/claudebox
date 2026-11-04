@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ \( -n "$PUSHOVER_TOKEN" -a -n "$PUSHOVER_USER" \) -o \
+     \( -f "$HOME/.pushover-app-token" -a -f "$HOME/.pushover-user" \) ]; then
+    pushover failed "$@"
+else
+    if [ -f $HOME/Sounds/failure.mp3 ]; then
+        afplay $HOME/Sounds/failure.mp3
+    fi
+fi
+
+exit 1

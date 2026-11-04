@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ \( -n "$PUSHOVER_TOKEN" -a -n "$PUSHOVER_USER" \) -o \
+     \( -f "$HOME/.pushover-app-token" -a -f "$HOME/.pushover-user" \) ]; then
+    pushover question "$@"
+else
+    if [ -f $HOME/Sounds/success.mp3 ]; then
+	afplay $HOME/Sounds/success.mp3
+    fi
+fi
+
+exit 0
