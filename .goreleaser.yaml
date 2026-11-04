@@ -1,0 +1,37 @@
+version: 2
+
+project_name: claudebox
+
+# Nothing to compile: we only use goreleaser for its multiarch image handling.
+builds:
+  - skip: true
+
+archives:
+  - formats: [none]
+
+checksum:
+  disable: true
+
+changelog:
+  disable: true
+
+release:
+  disable: true
+
+snapshot:
+  version_template: "snapshot"
+
+dockers_v2:
+  - images:
+      - "{{ .Env.REGISTRY }}"
+    tags:
+      - "{{ .Version }}"
+      - "{{ if not .IsSnapshot }}latest{{ end }}"
+    # BUILD_ARCH (e.g. "amd64,arm64") selects which platforms to build.
+    platforms:
+      - '{{ if contains .Env.BUILD_ARCH "amd64" }}linux/amd64{{ end }}'
+      - '{{ if contains .Env.BUILD_ARCH "arm64" }}linux/arm64{{ end }}'
+    extra_files:
+      - sandbox-scripts
+      - build-scripts
+    sbom: false
