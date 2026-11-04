@@ -23,6 +23,13 @@ import urllib.request
 API_URL = "https://api.pushover.net/1/messages.json"
 
 
+def usage():
+    if __doc__:
+        return(__doc__.strip())
+    else:
+        return("Usage: ./pushover.py <ok|failed|question> [detail]")
+
+
 def get_config_var(name, path=None):
     value = os.environ.get(name)
 
@@ -83,7 +90,8 @@ def push(status, detail=None):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
-        print(__doc__.strip())
+        print(usage())
+
         sys.exit(0)
 
     status = sys.argv[1]
